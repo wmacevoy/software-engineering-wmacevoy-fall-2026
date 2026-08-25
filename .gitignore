@@ -1,0 +1,14 @@
+node_modules/
+
+# Key material never belongs in the repository (I-7). Public keys and trust
+# anchors do, which is what the negations are for.
+*.pem
+*.key
+!*.pub
+keys/
+.env
+
+# Local tool caches and OS noise
+.viki/
+.DS_Store
+*.log

@@ -1,0 +1,41 @@
+# Only the services that currently exist are defined here, so that
+# `docker compose up --build` works from a clean checkout. The remaining
+# components in this directory are specified and not yet implemented; each
+# folder's README says so. They join this file as they land:
+#
+#   time       shared, faultable NTP source            (N-1, F-5)
+#   journal    append-only log store                   (A-4, A-5, L-9)
+#   sensor     one container per lot, from one image   (S-*, F-*, G-*)
+#
+# Note the build context: it is this directory rather than app/, so that images
+# can copy in the shared libraries (contract/, identity/, logger/) once they
+# depend on them. A Dockerfile cannot COPY from above its own context.
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: parking_user
+      POSTGRES_PASSWORD: parking_pass
+      POSTGRES_DB: parking
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    ports:
+      - "5432:5432"
+
+  app:
+    build:
+      context: .
+      dockerfile: app/Dockerfile
+    environment:
+      DATABASE_URL: postgres://parking_user:parking_pass@db:5432/parking
+      JWT_SECRET: demo-secret-change-me
+      PORT: 3000
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+
+volumes:
+  pgdata:
