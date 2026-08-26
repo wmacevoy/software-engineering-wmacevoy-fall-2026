@@ -21,7 +21,7 @@ a strictly lower layer.** Nothing may require a service, because there is no lay
 
 | Folder      | Layer | Kind    | Role                                              | Status |
 | ----------- | ----- | ------- | ------------------------------------------------- | ------ |
-| `contract/` | 0     | spec    | schemas, signing strings, error codes             | —      |
+| `contract/` | 0     | spec    | schemas, signing strings, error codes             | **done** |
 | `identity/` | 1     | library | key generation, signing, verification             | —      |
 | `logger/`   | 1     | library | structured records, hash chain, buffering         | —      |
 | `collector/`| 1     | library | poll, verify, derive `live`/`stale`/`unreachable` | —      |
@@ -32,8 +32,8 @@ a strictly lower layer.** Nothing may require a service, because there is no lay
 | `cli/`      | 2     | tool    | `parkctl` — ops tool, CI gate, grading harness    | partial |
 | `db/`       | —     | data    | migrations and seed                               | **runs** |
 
-Only `app/` and `db/` are implemented. Everything else is specified, has a README stating its
-contract, and is unbuilt. **A gap between the documents and the code is work to be done, not an
+Only `contract/`, `app/`, and `db/` are implemented. Everything else is specified, has a README
+stating its contract, and is unbuilt. **A gap between the documents and the code is work to be done, not an
 error in the documents.**
 
 Two folders exist as libraries rather than services on purpose. `identity/` stays a library because
@@ -47,8 +47,11 @@ is a compose change rather than a rewrite.
 ```sh
 docker compose up --build      # http://localhost:3000
 docker compose down -v         # reset; required after any schema change
-cli/check-layering.sh          # dependency rule
+npm run check                  # dependency rule, then tests
 ```
+
+Tests use Node's built-in runner and need no install. Every test names the requirement it covers
+(`T-3`), so a failure says which promise broke.
 
 Seed logins: `root` / `rootpass`, and `sensor/north` / `sensorpass`. Both belong to the old push
 model and are on their way out; see the migration note in `REQUIREMENTS.md`.

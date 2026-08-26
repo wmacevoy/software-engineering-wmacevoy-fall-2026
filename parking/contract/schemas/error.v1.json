@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "error.v1.json",
+  "title": "Error",
+  "description": "V-5. One envelope across every endpoint and version. The closed set of codes and their retryability lives in ../errors.js.",
+  "type": "object",
+  "required": ["error"],
+  "additionalProperties": false,
+  "properties": {
+    "error": {
+      "type": "object",
+      "required": ["code", "message", "retryable"],
+      "additionalProperties": false,
+      "properties": {
+        "code": {
+          "type": "string",
+          "description": "Closed set; callers branch on this."
+        },
+        "message": {
+          "type": "string",
+          "description": "For humans. Never parsed, and free to change without a version bump."
+        },
+        "retryable": {
+          "type": "boolean",
+          "description": "V-6. Stated rather than inferred from the status code, because the inference is what people get wrong."
+        },
+        "trace_id": { "type": ["string", "null"] }
+      }
+    }
+  }
+}

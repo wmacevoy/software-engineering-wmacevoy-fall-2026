@@ -1,0 +1,11 @@
+{
+  "name": "parking",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "description": "Workspace root: test runner and checks. Runtime dependencies live with each service, so that an image copies only what it runs.",
+  "scripts": {
+    "test": "node --test",
+    "check": "cli/check-layering.sh && npm test"
+  }
+}

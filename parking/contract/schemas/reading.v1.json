@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "reading.v1.json",
+  "title": "Sensor reading",
+  "description": "S-1. What GET /v1/reading returns. Signed per S-8; the signing string is defined in ../signing.js and covers lot_id, available, capacity, as_of, and nonce.",
+  "type": "object",
+  "required": ["lot_id", "available", "capacity", "status", "as_of", "age_ms", "nonce", "device_id", "sig"],
+  "additionalProperties": false,
+  "properties": {
+    "lot_id": { "type": "integer", "minimum": 1 },
+    "available": {
+      "type": "integer",
+      "description": "S-7 constrains this to [0, capacity] under normal operation. It is deliberately NOT constrained here: the wrong fault mode must be able to produce an out-of-range value, and C-5 requires the collector to reject it at the boundary rather than the schema silently making that case unreachable."
+    },
+    "capacity": { "type": "integer", "minimum": 0 },
+    "status": {
+      "enum": ["ok", "degraded"],
+      "description": "S-4. The sensor's assessment of itself. There is deliberately no 'offline' value: if it can answer, it is not offline. Reachability is derived by the consumer (C-4), never reported."
+    },
+    "as_of": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+      "description": "S-2. When the count was taken, not when the request was served. Milliseconds and Z are required because the value is signed and two spellings are two different signing strings."
+    },
+    "age_ms": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "S-3. Time since the count was taken, from a monotonic source. N-3 computes staleness from this and not from as_of, so that a wrong clock cannot make old data look fresh."
+    },
+    "nonce": { "type": "string", "minLength": 8, "pattern": "^[^|]+$" },
+    "device_id": { "type": "string", "minLength": 1, "pattern": "^[^|]+$" },
+    "sig": { "type": "string", "minLength": 1 }
+  }
+}

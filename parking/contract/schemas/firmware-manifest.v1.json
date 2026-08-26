@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "firmware-manifest.v1.json",
+  "title": "Firmware manifest",
+  "description": "G-2. The manifest is the signed object; the artifact is bound in by hash. Signing this rather than the binary keeps the signed thing small and fixed-shape.",
+  "type": "object",
+  "required": ["version", "target", "artifact_sha256", "min_version", "created_at", "expires_at"],
+  "additionalProperties": false,
+  "properties": {
+    "version": { "type": "string", "pattern": "^[^|]+$" },
+    "target": { "type": "string", "pattern": "^[^|]+$", "description": "G-4. Refused if it does not match the device." },
+    "artifact_sha256": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "min_version": {
+      "type": "string",
+      "pattern": "^[^|]+$",
+      "description": "G-3. The device also refuses anything at or below its current version. A valid signature on old software is exactly the shape of a rollback attack, and the signature check alone does not catch it."
+    },
+    "created_at": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$" },
+    "expires_at": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$",
+      "description": "Shallow defense against the freeze attack: updates withheld so a device never learns of a fix."
+    }
+  }
+}

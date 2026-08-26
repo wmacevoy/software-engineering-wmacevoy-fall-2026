@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "health.v1.json",
+  "title": "Health",
+  "description": "S-5. Served at /health, which is deliberately unversioned: it is the discovery endpoint, and a versioned one has a bootstrap problem — you would need to know the version to ask which versions exist.",
+  "type": "object",
+  "required": ["status", "device_id", "versions", "clock"],
+  "additionalProperties": false,
+  "properties": {
+    "status": {
+      "enum": ["ok", "degraded"],
+      "description": "Process liveness, which is a different question from whether the data is any good. A stuck sensor is ok here and wrong in /v1/reading, and ops must be able to see both."
+    },
+    "device_id": { "type": "string", "minLength": 1 },
+    "versions": {
+      "type": "array",
+      "items": { "type": "string", "pattern": "^v[0-9]+$" },
+      "minItems": 1,
+      "description": "V-2. API versions this sensor speaks. The collector negotiates against it (V-3)."
+    },
+    "uptime_s": { "type": "integer", "minimum": 0 },
+    "last_reading_at": {
+      "type": ["string", "null"],
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$"
+    },
+    "clock": {
+      "type": "object",
+      "required": ["state", "offset_ms"],
+      "additionalProperties": false,
+      "description": "N-2. Time agreement is a runtime observable, not an assumption.",
+      "properties": {
+        "state": { "enum": ["synced", "drifting", "unsynced"] },
+        "offset_ms": { "type": "integer" }
+      }
+    },
+    "firmware": {
+      "type": "object",
+      "required": ["version", "slot", "last_upgrade"],
+      "additionalProperties": false,
+      "description": "G-6. Reports the running version, which slot is active, and how the last attempt ended — including a revert, which is a normal outcome and not an error.",
+      "properties": {
+        "version": { "type": "string", "pattern": "^[^|]+$" },
+        "slot": { "enum": ["a", "b"] },
+        "last_upgrade": { "enum": ["ok", "reverted", "refused", "none"] }
+      }
+    },
+    "mode": {
+      "enum": ["ok", "slow", "down", "stuck", "wrong", "flapping", "skewed"],
+      "description": "F-1. Visible to ops and admin only; the collector never sees this endpoint's control fields (A-2)."
+    }
+  }
+}

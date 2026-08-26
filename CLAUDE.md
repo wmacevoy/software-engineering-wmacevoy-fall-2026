@@ -17,8 +17,8 @@ A course repository (software engineering, fall 2026). Teaching material, not a 
   it and it is not maintained.
 - `snowpack/` — empty placeholder. `.viki/`, `.vikiignore` — external tool cache, not project code.
 
-**Only `parking/app/` and `parking/db/` are implemented.** The other eight component folders are
-specified, each with a README stating its contract, and unbuilt. A gap between the documents and the
+**Only `parking/contract/`, `parking/app/`, and `parking/db/` are implemented.** The other seven
+component folders are specified, each with a README stating its contract, and unbuilt. A gap between the documents and the
 code is work to be done, not an error in the documents — do not "fix" a requirement by narrowing it
 to what the code happens to do.
 
@@ -34,10 +34,14 @@ docker compose down -v             # REQUIRED after any schema change (see below
 ```
 
 ```sh
-cli/check-layering.sh              # dependency rule; the only check that exists yet
+npm run check                      # layering rule, then tests
+npm test                           # node --test; no install needed, no dependencies
+node --test contract/signing.test.js   # a single file
 ```
 
-There is no test suite, linter, or build step. The frontend is plain static files served by Express
+Tests use Node's built-in runner (`node:test`), so `parking/package.json` has no dependencies —
+service dependencies stay in `app/package.json` so an image copies only what it runs. Every test
+names the requirement ID it covers (`T-3`). There is no linter or build step. The frontend is plain static files served by Express
 from `app/public` — no bundler, no transpile, so editing `public/*` only needs a browser reload
 (the container copies files at build time, so rebuild or bind-mount when iterating in Docker).
 

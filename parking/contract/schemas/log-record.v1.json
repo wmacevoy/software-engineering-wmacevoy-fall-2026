@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "log-record.v1.json",
+  "title": "Log record",
+  "description": "L-1. One event per record, fixed core fields on every one. This schema is an interface with consumers and versions under the same rules as the API (L-11).",
+  "type": "object",
+  "required": ["ts", "level", "service", "schema", "event"],
+  "properties": {
+    "ts": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}\\.\\d{3}Z$" },
+    "level": {
+      "enum": ["debug", "info", "warn", "error"],
+      "description": "L-5. An injected fault is warn, not error: it is expected and handled. Errors are for conditions a human must act on, and an error log full of drills stops being read."
+    },
+    "service": { "type": "string", "minLength": 1 },
+    "schema": { "type": "string", "description": "L-11. Version of this record shape." },
+    "trace_id": { "type": ["string", "null"], "description": "L-2. Generated per poll and propagated to the sensor, so one query returns both sides of an exchange." },
+    "lot_id": { "type": ["integer", "null"] },
+    "device_id": { "type": ["string", "null"] },
+    "event": { "type": "string", "minLength": 1, "pattern": "^[^|]+$" },
+    "reason": {
+      "type": ["object", "null"],
+      "description": "L-4, C-9. The inputs that drove a decision, structured rather than buried in a message. 'Marked stale: age 47000ms exceeded threshold 15000ms' is auditable; 'sensor returned 200' is not."
+    },
+    "seq": { "type": ["integer", "null"], "minimum": 0, "description": "L-9. Per-producer, strictly increasing by one." },
+    "prev_hash": { "type": ["string", "null"], "description": "L-9. Chains to the previous entry; the first uses GENESIS_HASH." },
+    "hash": { "type": ["string", "null"] },
+    "sig": { "type": ["string", "null"], "description": "Signed by the producing device, so a compromised journal cannot forge entries in its name." }
+  }
+}
