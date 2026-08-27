@@ -2,8 +2,9 @@
 
 ## The system we are imagining
 
-A city runs several parking lots. Each lot has hardware that counts free spaces. Those counts
-accumulate into a mobile web app that tells a driver where to park right now.
+A stadium complex runs a hundred parking lots holding a hundred thousand spaces. Each lot has
+hardware that counts free spaces. Those counts accumulate into a mobile web app that tells a driver
+where to park right now — while everyone else is trying to park at the same time.
 
 This document specifies **observable behavior**: what the system must do, stated so that it stays
 true no matter how we build it. Mechanism — keys, formats, algorithms — lives in `DESIGN.md`.
@@ -64,6 +65,82 @@ Recorded so they are not relitigated:
   behind NAT; we do not, and pulling would cost a service we do not need.
 - **A single signing key**, not a rotation hierarchy. Rotating a trust anchor using only the old
   anchor is genuinely hard and is named as deferred rather than pretended to be easy.
+
+---
+
+## E — Operating envelope
+
+How many, how badly may it break, and how long may it be down. The client answered these, and every
+requirement below is read inside these numbers. They are `K4` — true enough now, false eventually —
+so they are written down where they can be checked rather than assumed by whoever is typing.
+
+**Scale**
+
+**E-1.** One hundred lots, one hundred thousand spaces, one sensor per lot. The mean lot holds a
+thousand spaces; no requirement may assume a lot is small. One sensor now speaks for a thousand
+spaces, which makes the `Scope decisions` bet larger than it was and `S-6` — capacity disagreement
+is a fault, not a correction — more expensive to get wrong.
+
+**E-2.** Load is an event, not a steady state. Roughly a hundred thousand vehicles arrive over the
+two hours before an event (~14 a second across the complex) and leave in under one (~28 a second).
+Arrival is not spread evenly across lots: a favored lot can fill in ten minutes, which is 1.7
+vehicles a second into a single count. **Sizing is against the peak; the daily average is not a
+design input.** Load is event-shaped; availability (`E-6`) deliberately is not.
+
+**E-3.** Up to one hundred thousand clients may have the customer view open at once, and it must
+stay correct and fresh for all of them. How often a client asks is a design variable, and `E-2` and
+`E-3` together are what constrain it.
+
+**E-4.** At one poll per sensor per five seconds, the collector ingests about twenty readings a
+second — 1.7 million a day, 630 million a year. Storage, indexing, and retention are sized from this
+number, not from the demo.
+
+**E-5.** A count can be wrong while being fresh by the clock. At `E-2` peak, a ten-second-old count
+for a filling lot is off by seventeen spaces. Staleness thresholds (`N-3`, `U-2`) are derived from
+the fill rate, not chosen as a round number.
+
+**Availability**
+
+**E-6.** Availability is set by the clock, not by the calendar. Outside 02:00–04:00 local, total
+user-visible unavailability of the customer view may not exceed **five seconds in any 24 hours**;
+inside that window it may reach **one hour**. An event does not buy a larger budget and a quiet
+Tuesday does not shrink one — which is the point: the system never has to know whether an event is
+happening. Five seconds out of the twenty-two is 99.994%; quote the figure for the whole day and it
+is 95.8%, which is why the window has to be named rather than folded into a number of nines.
+
+**E-7.** A backend failure shorter than the budget must not be visible to the driver at all. The
+customer view rides out a brief gap — last good count, its age, no error screen — so recovery
+happens inside `E-6` rather than consuming it. At five seconds a day, no human is in the loop:
+detection and failover are automatic, or the budget is spent before anyone has read the page.
+
+**E-8.** The budget is one hour inside a two-hour frame, and the extra hour is **rollback margin,
+not spare budget**. Everything that cannot be done live happens here: schema migration (`V-7`),
+firmware rollout (`G`), and mechanical service on the lots. Anything that cannot be completed *and
+verified* — and if necessary reversed — inside the window must be doable live, or it cannot be done
+at all. Two consequences worth stating: the abort decision comes at 04:00 minus however long the
+rollback takes, so the rollback has to have been timed; and an hour is not long against `E-4`'s row
+counts, so a migration that scans the reading table is not a migration this system can perform.
+
+**E-9.** Maintenance is a state, not a fault. A lot under scheduled service is distinct from `down`,
+`stale`, and `degraded`: it does not alarm, does not count against `E-6`, and reads to a driver as
+closed for service rather than as missing data. A system that goes red every night at 2am teaches
+its operators to ignore red.
+
+**E-10.** The window is stated in **local** time, and local time is not monotonic. Twice a year it
+jumps: one hour never happens, and one hour happens twice. So the frame is not always two hours
+wide — on the spring transition it holds a single real hour, exactly the budget, with the margin of
+`E-8` gone — and an instant inside the repeated hour is ambiguous if window membership is decided by
+comparing formatted local clock strings. Membership is computed on a real timeline (`N`), the
+transition nights are known in advance, and work that needs margin is not scheduled on the one night
+that has none.
+
+**Not yet answered.** The client has given scale and availability; recovery is still open, and until
+it is answered these are guesses nobody has agreed to:
+
+- How long may each component take to come back, and who brings it back?
+- How much data may be lost — in minutes of readings — when the database is restored?
+- How long are readings kept, and who is entitled to shorten that?
+- Does the ops UI share `E-6`, or is it allowed to be worse? Nothing yet says.
 
 ---
 
