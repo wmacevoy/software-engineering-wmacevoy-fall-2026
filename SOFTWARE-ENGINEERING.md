@@ -170,12 +170,12 @@ The engineering response is not willpower. It is to change the terrain.
 
 ## The cost of testing changes everything
 
-**The structural difference between software engineering and the other engineering disciplines is
-the cost of a test.** You cannot build a second bridge to see whether the first one stands. A wind
-tunnel hour is expensive, a mask set is expensive, a recall is catastrophic. So those disciplines
-front-load everything — analysis, simulation, review, sign-off — before anything is cut. Waterfall
-is not a bad habit inherited from the 1970s; it is the correct response to a test that costs a
-million dollars and takes a year.
+**The first structural difference between software engineering and the other engineering
+disciplines is the cost of a test.** You cannot build a second bridge to see whether the first one
+stands. A wind tunnel hour is expensive, a mask set is expensive, a recall is catastrophic. So those
+disciplines front-load everything — analysis, simulation, review, sign-off — before anything is cut.
+Waterfall is not a bad habit inherited from the 1970s; it is the correct response to a test that
+costs a million dollars and takes a year.
 
 Software's tests can be free, run in a second, and run ten thousand times a day. Nearly everything
 filed under "agile" is downstream of that single fact. Three things follow that are usually left
@@ -221,6 +221,64 @@ Two properties of a loop matter more than its coverage:
 - **A loop you do not trust is worse than none.** Flaky tests train a team to ignore red, and after
   that the suite that would have caught the real one has been disarmed. `T-1` bans unseeded
   randomness for this reason, not for tidiness.
+
+---
+
+## Nothing has mass
+
+The second difference is physical, and it shows up first in the schedule.
+
+Drywall goes up after plumbing. Not by convention — the pipe occupies the space the wall will cover,
+and matter cannot be threaded through matter after the fact. The frame follows the foundation
+because it rests on it. Every arrow in a Gantt chart in the older disciplines is, at bottom, a fact
+about mass: one thing must physically exist before the next can be attached to it, and the
+half-finished intermediate states are real objects that cost real money.
+
+Software is massless. A function can be called before it is written. Nothing occupies the space
+another thing will need. There is no partially-poured anything.
+
+So when a software schedule says *"we can't start B until A is done,"* that arrow is almost never a
+fact about the world. It is a fact about the design: **B does not know what A will look like.** The
+dependency is an unwritten interface, and it is being paid for in calendar time.
+
+**The design goal is a flat chart** — everything startable at once. The mechanism is one the
+discipline already owns, used deliberately instead of incidentally:
+
+| The dependency says            | The artifact that dissolves it                        |
+| ------------------------------ | ----------------------------------------------------- |
+| "B needs A's shape"            | an interface — signature, schema, error codes          |
+| "B needs A to answer"          | a mock that answers, and misbehaves on request         |
+| "B isn't done until A works"   | a test that fails today and passes when A arrives      |
+
+None of the three requires A to exist. The dependency does not get sequenced, it gets **specified**
+— which is why `contract/` is layer 0 and was built first while seven of the components that will
+use it are still only READMEs. The promise is what unblocks, not the implementation. `collector/`
+gets a folder while running in-process for the same reason: *so that the interface is real before
+the network is.*
+
+**The cost is real and has to be paid on purpose.** A mock is a K4 — *the real component will behave
+like this* — false the day you write it. Flattening the chart does not delete the dependency; it
+converts a **scheduling** risk into an **integration** risk. That is a good trade only if you
+integrate continuously. Mock everything, integrate at the end, and you have built the worst artifact
+in this document: every team delivered on time and the system does not work. That is the Time
+section's horizontal-layers failure arriving through a side door.
+
+Two rules keep the trade good:
+
+- **The mock and the real thing must be interchangeable under the same tests.** That is what `T-4`
+  is for — conformance checkable from outside means the fake and the shipped sensor answer to one
+  specification, so swapping them is an event with a result rather than a discovery.
+- **Sequence around irreversibility, not around incompleteness.** The orderings that genuinely
+  survive in software are the one-way doors — a schema with data under it (`V-7`), a distributed key
+  (`I-2`), a released image (`G-3`) — plus the honest case where you must learn something before you
+  can design against it, and a spike is the mock for that. Every other arrow in the chart is a
+  confession that an interface has not been written down.
+
+One warning follows from the same property. Mass supplies error signals for free: a bad structure
+sags, cracks, or falls down, and nobody has to be clever to notice. **Software has no gravity, so
+nothing collapses to tell you.** A bad design holds itself up indefinitely, at full speed, with the
+tests passing. Every feedback loop in the previous section exists to replace the signal that mass
+would have given away.
 
 ---
 
@@ -495,6 +553,7 @@ a model that has already been retired.
 | Provenance                  | `S-8`, `I-5`, `L-9`, and signed commits in `CONTRIBUTING.md`      |
 | Cost of testing, designed   | `T-1`, `T-2`, `T-4`, `T-5`, `F-1`                                 |
 | One-way doors               | `V-7` (migrations), `G-3` (rollback), `I-2` (keys)                |
+| Flat chart, by contract     | `contract/` at layer 0, and seven components specified but unbuilt |
 | Ethics in the requirements  | "Counts, not locations"; `A-5`; the language packs                |
 | Fences, not heroics         | `npm run check`, `parkctl conform`, one-command reset             |
 | Scale, recovery, availability | `E` — 100 lots, five seconds a day, one hour at 2am               |
