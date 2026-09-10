@@ -45,6 +45,24 @@ earliest one available, arriving weeks before the schedule shows anything.
 
 ---
 
+## Why software engineering differs
+
+Software engineering has two advantages the older disciplines do not, and between them they account
+for most of what follows:
+
+- **Tests are cheap.** You cannot build a second bridge to find out whether the first one holds.
+  You can run a suite a thousand times before lunch. What follows from that is "The cost of testing
+  changes everything".
+- **Software has no gravity.** Nothing sags or cracks to tell you it is wrong, so every signal a
+  physical structure gives away for free has to be built here on purpose. What follows from that is
+  "Nothing has mass".
+
+The two pull in opposite directions, which is why neither is simply good news. Cheap tests make
+certainty affordable; the absence of gravity is what makes it necessary to go buy some, because a
+bad design will hold itself up indefinitely, at full speed, with the tests passing.
+
+---
+
 ## Most of practice is being less nervous
 
 Backups. Version control. Tests. Code review. Short iterations. Client demos. Staging environments.

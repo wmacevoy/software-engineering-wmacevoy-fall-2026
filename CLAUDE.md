@@ -11,6 +11,27 @@ A course repository (software engineering, fall 2026). Teaching material, not a 
 
 - `AGENTS.md` — the working agreement for agents. Read it first.
 - `CONTRIBUTING.md` — how a change is accepted: signing, definition of done, what CI enforces.
+- `SOFTWARE-ENGINEERING.md` — why we work this way: unknowing (`K0`–`K4`), the cost of a test,
+  masslessness and the flat schedule, provenance, agents in the loop. Nothing in it is CI-checkable,
+  which is the stated reason it is written down.
+- `AGILE_VS_WATERFALL.md` — the shape: both orders of the six steps, the cost of a test as the
+  dividing line, the vocabulary (sprint, spike, stand-up, scrum, …), falling down the waterfall,
+  requirement vs. design, and story → test → API.
+- `TESTING.md` — the testing guidebook, generalized from the ArduinoUnit guidebook: which fear each
+  kind of test retires, repeatability as a property of state (local, sharded, global) and of the
+  environment (containers, lock files), what to pin, and testing UIs, platforms, and deploys.
+- `SOFTWARE-ENGINEERING-2.md` — six more ideas, for students, assuming no prior reading: where
+  requirements come from, state as the material, essential vs. accidental complexity, conceptual
+  integrity, locality of reasoning, carry cost. Every section is anchored in `parking/`.
+- `docs/TEAM-AND-CLIENT.md` — the guidebook: team as a first-order variable, roles, the client, the
+  first conversation, iterations and demos, and the hypothetical VIP pivot as the cost of late `K2`.
+- `essentials/` — the tool sequence, one file each in the same shape: `SHELL`, `GIT`, `1PASSWORD`,
+  `GITHUB-ISSUES`, `GITHUB-ACTIONS`, `DOCKER`, `PACKAGES`, `AGENT`. `README.md` there is the index,
+  with the fear each retires and the fence a student proves.
+- `docs/` is also the GitHub Pages site: `index.html`, the field guide, and its markdown twin are
+  **generated** by `node docs/build/build.js` from the two essays, the guidebook, `parking/` documents,
+  `AGENTS.md`, and `CONTRIBUTING.md`. Rebuild after editing any of those; never edit the generated
+  files. A heading the build looks for and cannot find fails the build on purpose.
 - `parking/` — the live system. `README.md` there has the component table and the dependency rule;
   `REQUIREMENTS.md` is numbered observable behavior; `DESIGN.md` is chosen mechanism.
 - `attic/parking/` — the original demo as it arrived, kept as a before-picture. Nothing depends on

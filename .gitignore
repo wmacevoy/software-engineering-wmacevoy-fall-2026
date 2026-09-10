@@ -12,3 +12,8 @@ keys/
 .viki/
 .DS_Store
 *.log
+
+# Editor artifacts: Emacs autosaves and lock symlinks
+\#*\#
+.\#*
+*~
